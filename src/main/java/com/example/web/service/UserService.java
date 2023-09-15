@@ -4,7 +4,6 @@ package com.example.web.service;
 import com.example.web.exception.ErrorCode;
 import com.example.web.exception.SimpleException;
 import com.example.web.model.User;
-import com.example.web.model.UserRole;
 import com.example.web.model.entity.UserEntity;
 import com.example.web.repository.UserEntityRepository;
 import com.example.web.util.JwtTokenUtils;
@@ -53,20 +52,13 @@ public class UserService {
 
 
     @Transactional
-    public User join(String userName, String password, String role) {
+    public User join(String userName, String password) {
         // check the userId not exist
         userRepository.findByUserName(userName).ifPresent(it -> {
             throw new SimpleException(ErrorCode.DUPLICATED_USER_NAME, String.format("userName is %s", userName));
         });
-        UserEntity user = UserEntity.of(userName, encoder.encode(password));
 
-        if (role.equals("user")) {
-            user.setRole(UserRole.USER);
-        } else if (role.equals("admin")) {
-            user.setRole(UserRole.ADMIN);
-        }
-
-        UserEntity savedUser = userRepository.save(user);
+        UserEntity savedUser = userRepository.save(UserEntity.of(userName, encoder.encode(password)));
         return User.fromEntity(savedUser);
     }
 
